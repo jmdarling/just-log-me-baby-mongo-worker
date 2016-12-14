@@ -1,0 +1,19 @@
+{
+  "name": "just-log-me-baby-mongo-worker",
+  "version": "0.0.1",
+  "description": "Mongo worker for just-log-me-baby",
+  "main": "app.js",
+  "author": "Jonathan Darling",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "~6.9.1"
+  },
+  "dependencies": {
+    "dotenv": "^2.0.0",
+    "mongodb": "^2.2.16",
+    "redis": "^2.6.3"
+  }
+}
