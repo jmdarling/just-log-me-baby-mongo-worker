@@ -11,6 +11,17 @@ let redisClient = {}
 const listKey = 'simple_logger_queue'
 const timeoutMs = 5000
 
+// Allow writing stdout and stderr to files.
+if (config.stdoutFileDestination != null) {
+  const stdoutWriteStream = fs.createWriteStream(config.stdoutFileDestination)
+  process.stdout.write = stdoutWriteStream.bind(stdoutWriteStream)
+}
+
+if (config.stderrFileDestination != null) {
+  const stderrWriteStream = fs.createWriteStream(config.stderrFileDestination)
+  process.stdout.write = stderrWriteStream.bind(stderrWriteStream)
+}
+
 console.log('Just Log Me Baby Consumer running\n\n')
 
 MongoClient.connect(config.mongoUrl, (error, dbCon) => {
