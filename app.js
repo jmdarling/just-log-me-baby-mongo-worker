@@ -1,3 +1,4 @@
+const fs = require('fs')
 const mongodb = require('mongodb')
 const redis = require('redis')
 
@@ -14,12 +15,12 @@ const timeoutMs = 5000
 // Allow writing stdout and stderr to files.
 if (config.stdoutFileDestination != null) {
   const stdoutWriteStream = fs.createWriteStream(config.stdoutFileDestination)
-  process.stdout.write = stdoutWriteStream.bind(stdoutWriteStream)
+  process.stdout.write = stdoutWriteStream.write.bind(stdoutWriteStream)
 }
 
 if (config.stderrFileDestination != null) {
   const stderrWriteStream = fs.createWriteStream(config.stderrFileDestination)
-  process.stdout.write = stderrWriteStream.bind(stderrWriteStream)
+  process.stderr.write = stderrWriteStream.write.bind(stderrWriteStream)
 }
 
 console.log('Just Log Me Baby Consumer running\n\n')
