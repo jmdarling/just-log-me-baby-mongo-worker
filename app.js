@@ -1,8 +1,16 @@
 const fs = require('fs')
 const mongodb = require('mongodb')
 const redis = require('redis')
+const SdhpLogger = require('sdhp-logger')
 
 const config = require('./config')
+
+const logger = new SdhpLogger({
+  logToConsole: config.logFileDestination == null,
+  logToFile: config.logFileDestination != null,
+  logFilePath: config.logFileDestination,
+  minimumSeverity: config.logSeverity
+})
 
 const MongoClient = mongodb.MongoClient
 
@@ -12,30 +20,19 @@ let redisClient = {}
 const listKey = 'simple_logger_queue'
 const timeoutMs = 5000
 
-// Allow writing stdout and stderr to files.
-if (config.stdoutFileDestination != null) {
-  const stdoutWriteStream = fs.createWriteStream(config.stdoutFileDestination)
-  process.stdout.write = stdoutWriteStream.write.bind(stdoutWriteStream)
-}
-
-if (config.stderrFileDestination != null) {
-  const stderrWriteStream = fs.createWriteStream(config.stderrFileDestination)
-  process.stderr.write = stderrWriteStream.write.bind(stderrWriteStream)
-}
-
-console.log('Just Log Me Baby Consumer running\n\n')
+logger.info('Just Log Me Baby Mongo Consumer starting.')
 
 MongoClient.connect(config.mongoUrl, (error, dbCon) => {
   if (error) {
-    console.error(`Failed to connect to connect to database with error: ${error}. Killing app.\n\n`)
+    logger.error(`Failed to connect to connect to database with error: ${error}. Killing app.`)
     process.exit(1)
   }
 
-  console.log(`Connected to MongoDB at ${config.mongoUrl}\n\n`)
+  logger.info(`Connected to MongoDB at ${config.mongoUrl}.`)
   databaseConnection = dbCon
   redisClient = redis.createClient(config.redisUrl)
   redisClient.on('connect', () => {
-    console.log(`Connected to redis instance at ${config.redisUrl}\n\n`)
+    logger.info(`Connected to redis instance at ${config.redisUrl}.`)
     run()
   })
 })
@@ -44,17 +41,17 @@ function run () {
   pop()
     .then((item) => {
       if (item == null) {
-        console.log(`Queue empty, sleeping for ${timeoutMs}ms\n\n`)
+        logger.debug(`Queue empty, sleeping for ${timeoutMs}ms.`)
         setTimeout(run, timeoutMs)
         return
       }
 
-      console.log(`Item found in queue:\n${JSON.stringify(item)}\n\n`)
+      logger.debug(`Item found in queue:\n${JSON.stringify(item)}`)
       databaseConnection.collection(item.database).insert(item.content)
       run()
     })
     .catch(error => {
-      console.error(error)
+      logger.error(error)
       process.exit(1)
     })
 }
