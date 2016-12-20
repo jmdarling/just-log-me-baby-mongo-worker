@@ -1,4 +1,3 @@
-const fs = require('fs')
 const mongodb = require('mongodb')
 const redis = require('redis')
 const SdhpLogger = require('sdhp-logger')
@@ -17,7 +16,6 @@ const MongoClient = mongodb.MongoClient
 let databaseConnection = {}
 let redisClient = {}
 
-const listKey = 'simple_logger_queue'
 const timeoutMs = 5000
 
 logger.info('Just Log Me Baby Mongo Consumer starting.')
@@ -58,7 +56,7 @@ function run () {
 
 function pop () {
   return new Promise((resolve, reject) => {
-    redisClient.rpop(listKey, (error, response) => {
+    redisClient.rpop(config.redisListKey, (error, response) => {
       if (error != null) {
         return reject(error)
       }
